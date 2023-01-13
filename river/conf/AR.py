@@ -1,6 +1,7 @@
 from river import base, stats
 
 from . import interval
+import numpy as np
 
 
 class RegressionJackknife(base.Wrapper, base.Regressor):
@@ -103,6 +104,37 @@ class RegressionJackknife(base.Wrapper, base.Regressor):
         from river import linear_model, preprocessing
 
         yield {"regressor": (preprocessing.StandardScaler() | linear_model.LinearRegression())}
+    
+    def auto_regressive_one(self, x: np.array, start):
+
+        """Simulate AR(1) process.
+
+        Parameters
+        ----------
+        x
+            numpy array times series.
+        
+
+        Returns
+        -------
+        The process.
+
+        """
+
+        
+        xt = np.empty((self.window_size-1,1))
+        xt[0,1] = x[start,1]
+        const = np.ones((self.window_size))
+        x_tilda = np.concatenate((const,x), axis=1)
+        est = np.inv(x_tilda[start:self.window_size-1].T @ x_tilda[start:self.window_size-1]) @ x_tilda[start:self.window_size-1].T @ x[start+1:self.window_size]
+        alpha = est[0]
+        beta = est[1]
+
+        for t in range(start+1,self.window_size):
+            xt[t,1] = alpha + beta*xt[t-1,1]
+
+        return xt
+
 
     def learn_one(self, x, y):
 
