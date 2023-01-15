@@ -2,6 +2,33 @@ from river import base, stats
 
 from . import interval
 import numpy as np
+import matplotlib.pyplot as plt
+
+
+class AutoregressiveModels():
+
+    def __init__(self, window_size) -> None:
+         #self.parameters = p
+         self.window_size = window_size
+
+    
+    def process(self, start):
+
+        x = [0]
+
+        for t in range(start+1,self.window_size):
+            x.append(0.5*x[t-1] + np.random.rand())
+
+        return x
+
+    
+    def plot_process(self, x):
+
+        plt.plot(x,label="AR(1) process")
+        plt.title("Autoregressive (AR) Model")
+        plt.legend()
+        plt.show()
+
 
 
 class RegressionJackknife(base.Wrapper, base.Regressor):
